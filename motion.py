@@ -20,7 +20,7 @@ logger.addHandler(handler)
 
 
 COOL_DOWN = (60 * 10)
-PIR_URL = 'http://' + secrets.HUE_BRIDGE + '/api/' + secrets.USER_ID + '/sensors/13'
+PIR_URL = 'http://' + secrets.HUE_BRIDGE + '/api/' + secrets.USER_ID + '/sensors/23'
 
 lastPrint = lastAction = dt.datetime.now()
 state = -1
