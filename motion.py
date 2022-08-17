@@ -21,15 +21,38 @@ logger.addHandler(handler)
 
 COOL_DOWN = (60 * 10)
 PIR_URL = 'http://' + secrets.HUE_BRIDGE + '/api/' + secrets.USER_ID + '/sensors/23'
+LIFX_STATE = 'https://api.lifx.com/v1/lights/' + secrets.LIFX_ID + '/state'
+LIFX_HEADERS = {
+  "Authorization": "Bearer %s" % secrets.LIFX_TOKEN,
+}
 
 lastPrint = lastAction = dt.datetime.now()
 state = -1
 
 def togglelifx(on):
   if on:
+    payload = {
+      "power": "on",
+    }
+    putLIFXState(payload)
     logger.info("LIFX ON")
   else:
-    logger.info("LIFX OFF")
+    payload = {
+      "power": "off",
+    }
+    putLIFXState(payload)
+    logger.info("LIFX OFF")    
+
+def putLIFXState(payload):
+    try:
+      response = requests.put(LIFX_STATE, data=payload, headers=LIFX_HEADERS)
+      json_data = json.loads(response.text)
+      logger.info(json_data['results'])
+      return json_data['results'] is True
+    except:
+      logger.exception("LIFX exception occurred")
+      logger.info(json_data['results'])
+      return True  
 
 def getPirState():
   try:
