@@ -84,4 +84,4 @@ while True:
     state = 0
     togglelifx(False)
 
-  time.sleep(2.0)
+  time.sleep(1.0)
