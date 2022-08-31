@@ -51,7 +51,6 @@ def putLIFXState(payload):
       return json_data['results'] is True
     except:
       logger.exception("LIFX exception occurred")
-      logger.info(json_data['results'])
       return True  
 
 def getPirState():
