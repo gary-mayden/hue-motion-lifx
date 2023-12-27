@@ -32,7 +32,7 @@ TUYA_HEADERS = {
     "t": str(int(time.time() * 1000)),
     "mode": "cors",
     "Content-Type": "application/json",
-    "sign": secrets.TUYA_SIGN,
+    "sign": "",
     "access_token": secrets.TUYA_CLIENT_SECRET,
 }
 
@@ -55,13 +55,39 @@ def toggleTuya(on):
 
 def putTUYAState(payload):
     try:
-      response = requests.put(TUYA_STATE, data=payload, headers=TUYA_HEADERS)
-      json_data = json.loads(response.text)
-      logger.info(json_data['results'])
-      return json_data['results'] is True
+        nonce = str(uuid.uuid4())
+
+        t = str(int(time.time() * 1000))
+
+        stringToSign = "POST\n\n{}\n{}\n{}".format(
+            hashlib.sha256(json.dumps(payload).encode('utf-8')).hexdigest(),
+            nonce,
+            TUYA_STATE
+        )
+
+        str_to_sign = "{}{}{}{}{}".format(
+            secrets.TUYA_CLIENT_ID,
+            secrets.TUYA_CLIENT_SECRET,
+            t,
+            nonce,
+            stringToSign
+        )
+
+        signature = hmac.new(
+            secrets.TUYA_CLIENT_SECRET.encode('utf-8'),
+            str_to_sign.encode('utf-8'),
+            hashlib.sha256
+        ).hexdigest().upper()
+
+        TUYA_HEADERS["sign"] = signature
+
+        response = requests.post(TUYA_STATE, data=json.dumps(payload), headers=TUYA_HEADERS)
+        json_data = json.loads(response.text)
+        logger.info(json_data)
+        return json_data['success'] is True
     except:
-      logger.exception("exception occurred")
-      return True
+        logger.exception("exception occurred")
+        return True
 
 def togglelifx(on):
   if on:
