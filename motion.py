@@ -25,9 +25,43 @@ LIFX_STATE = 'https://api.lifx.com/v1/lights/' + secrets.LIFX_ID + '/state'
 LIFX_HEADERS = {
   "Authorization": "Bearer %s" % secrets.LIFX_TOKEN,
 }
+TUYA_STATE = 'https://openapi.tuyaus.com/v1.0/iot-03/devices/' + secrets.TUYA_DEVICE_ID + '/commands'
+TUYA_HEADERS = {
+    "sign_method": "HMAC-SHA256",
+    "client_id": secrets.TUYA_CLIENT_ID,
+    "t": str(int(time.time() * 1000)),
+    "mode": "cors",
+    "Content-Type": "application/json",
+    "sign": secrets.TUYA_SIGN,
+    "access_token": secrets.TUYA_CLIENT_SECRET,
+}
 
 lastPrint = lastAction = dt.datetime.now()
 state = -1
+
+def toggleTuya(on):
+  if on:
+    payload = {
+      "commands": [{"code": "switch_led", "value": True}]
+    }
+    putTUYAState(payload)
+    logger.info("TUYA ON")
+  else:
+    payload = {
+      "commands": [{"code": "switch_led", "value": False}]
+    }
+    putTUYAState(payload)
+    logger.info("TUYA OFF")
+
+def putTUYAState(payload):
+    try:
+      response = requests.put(TUYA_STATE, data=payload, headers=TUYA_HEADERS)
+      json_data = json.loads(response.text)
+      logger.info(json_data['results'])
+      return json_data['results'] is True
+    except:
+      logger.exception("exception occurred")
+      return True
 
 def togglelifx(on):
   if on:
@@ -78,9 +112,11 @@ while True:
     if state != 1:
       state = 1
       togglelifx(True)
+      toggleTuya(True)
   elif pir is False and (now - lastAction).total_seconds() > COOL_DOWN:
     lastAction = now
     state = 0
     togglelifx(False)
+    toggleTuya(False)
 
   time.sleep(1.0)
