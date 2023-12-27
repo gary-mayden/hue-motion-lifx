@@ -20,7 +20,7 @@ logger.addHandler(handler)
 
 
 COOL_DOWN = (6 * 10)
-PIR_URL = 'http://' + secrets.HUE_BRIDGE + '/api/' + secrets.USER_ID + '/sensors/23'
+PIR_URL = 'http://' + secrets.HUE_BRIDGE + '/api/' + secrets.USER_ID + '/sensors/2'
 LIFX_STATE = 'https://api.lifx.com/v1/lights/' + secrets.LIFX_ID + '/state'
 LIFX_HEADERS = {
   "Authorization": "Bearer %s" % secrets.LIFX_TOKEN,
@@ -145,4 +145,4 @@ while True:
     togglelifx(False)
     toggleTuya(False)
 
-  time.sleep(1.0)
+  time.sleep(.5)
